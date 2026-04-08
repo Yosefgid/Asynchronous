@@ -13,23 +13,37 @@ namespace Asynchronous
         }
         static async Task PrintHelloWorld()
         {
+            var random = new Random();
+            var cts = new CancellationTokenSource(5000);
+            var token = cts.Token;
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var sayHello = Task.Run(async () =>
-            {
-                await Task.Delay(3000);
-                Console.WriteLine("Hello");
-            });
 
-            var sayWorld = Task.Run(async () =>
+            try
             {
-                await Task.Delay(3000);
-                Console.WriteLine("World!");
-            });
+                Task<string> sayHello = Task.Run(async () =>
+                {
+                    int delay = random.Next(1000, 10000);
+                    await Task.Delay(delay, token);
+                    return "Hello...";
+                }, token);
 
-            await Task.WhenAll([sayHello, sayWorld]);
-            stopwatch.Stop();
-            Console.WriteLine($"It took {stopwatch.ElapsedMilliseconds}ms to execute code!");
+                Task<string> sayWorld = Task.Run(async () =>
+                {
+                    int delay = random.Next(1000, 10000);
+                    await Task.Delay(delay, token);
+                    return "...World";
+                }, token);
+
+                var combinedTask = await Task.WhenAll(sayHello, sayWorld);
+                Console.WriteLine(combinedTask[0] + combinedTask[1]);
+                stopwatch.Stop();
+                Console.WriteLine($"It took {stopwatch.ElapsedMilliseconds}ms to execute code!");
+            }
+            catch(Exception delayedTooLongException)
+            {
+                Console.WriteLine("The task has been cancelled: It took more than 5 seconds: it took" + stopwatch.Elapsed);
+            }
         } 
     }
 }
