@@ -13,5 +13,6 @@ namespace Asynchronous
             var content = await File.ReadAllTextAsync(filePath);
             return content;
         }
+        public async Task<string>
     }
 }
