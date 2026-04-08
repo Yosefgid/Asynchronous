@@ -3,6 +3,7 @@ using System.Diagnostics.Tracing;
 using System.Net.NetworkInformation;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Asynchronous
 {
@@ -48,21 +49,42 @@ namespace Asynchronous
 
             AsyncFileManager fileManager = new();
             var filePath = "SuperSecretFile.txt";
-            var encrypted = await fileManager.ReadFile(filePath);
-            var decrypted = Decrypt(encrypted);
+            var encrypted = fileManager.ReadFile(filePath);
+            //var decrypted = Decrypt(encrypted);
 
-            fileManager.WriteFile("DecryptedMessage.txt", decrypted);
-            Console.WriteLine(decrypted);
+            //fileManager.WriteFile("DecryptedMessage.txt", decrypted);
+            //Console.WriteLine(decrypted);
 
+            //Concurrency
+            var filePath1 = "ReallySuperSecretFile.txt";
+            var filePath2 = "SuperTopSecretTextFile.txt";
+            var encrypted1 = fileManager.ReadFile(filePath1);
+            var encrypted2 = fileManager.ReadFile(filePath2);
 
+            string[] combined = await Task.WhenAll(encrypted, encrypted1, encrypted2);
 
+            //Now the decrypt 
+            List<string> decryptedCombined = new();
+            foreach(string curr in combined)
+            {
+                Console.WriteLine(Decrypt(curr));
+                
+                decryptedCombined.Add((Decrypt(curr)));
+                
             }
+            
+            string finalCombined = string.Join( " ", decryptedCombined);
+
+            fileManager.WriteFile("DecryptedMessage.txt", finalCombined);
+
+
+        }
 
 
         static string Decrypt(string content)
         {
 
-            var letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYX";
+            var letters = "abcdefghijklmnopqrstuvwxyz";
             char[] contentR = content.ToCharArray();
             var lettersArr = letters.ToCharArray();
             List<char> result = new();
@@ -71,26 +93,39 @@ namespace Asynchronous
             {
                 if (!char.IsLetter(letter))
                 {
+
                     result.Add(letter);
                     continue;
 
                 }
-                int indexOf = letters.IndexOf(letter);
-                int newIndex = indexOf + 1;
+                int indexOf = letters.IndexOf(char.ToLower(letter));
+                int newIndex = (indexOf + 1) % letters.Length;
                 result.Add(letters[newIndex]);
+
             }
+            result[0] = char.ToUpper(result[0]);
+           
 
             return new string(result.ToArray());
 
-            //for (int i = 0; i < result.Length; i++)
+            //for (int i = 0; i < contentR.Length; i++)
             //{
-            //    char curr = result[i];
+            //    char curr = contentR[i];
             //    if (char.IsLetter(curr))
             //    {
-            //        result[i] = (char)(curr + 1);
+            //        if (curr == 'z')
+            //        {
+            //            contentR[i] = 'a';
+            //        }
+            //        else
+            //        {
+
+            //            contentR[i] = (char)(curr + 1);
+            //        }
+
             //    }
             //}
-            //return new string(result);
+            //return new string(contentR);
 
         }
 
