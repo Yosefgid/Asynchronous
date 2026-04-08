@@ -8,16 +8,28 @@ namespace Asynchronous
         static async Task Main(string[] args)
         {
             await PrintHelloWorld();
+             
           
         }
         static async Task PrintHelloWorld()
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            await Task.Delay(2000);
-            Console.WriteLine("Hello World!");
+            var sayHello = Task.Run(async () =>
+            {
+                await Task.Delay(3000);
+                Console.WriteLine("Hello");
+            });
+
+            var sayWorld = Task.Run(async () =>
+            {
+                await Task.Delay(3000);
+                Console.WriteLine("World!");
+            });
+
+            await Task.WhenAll([sayHello, sayWorld]);
             stopwatch.Stop();
             Console.WriteLine($"It took {stopwatch.ElapsedMilliseconds}ms to execute code!");
-        }
+        } 
     }
 }
