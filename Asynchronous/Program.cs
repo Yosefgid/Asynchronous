@@ -42,13 +42,58 @@ namespace Asynchronous
             //    }
             //});
             //await Task.WhenAll([factorialNumbers, printStory]);
+
+
+            //Read/Write
+
             AsyncFileManager fileManager = new();
             var filePath = "SuperSecretFile.txt";
-            Console.WriteLine(await fileManager.ReadFile(filePath));
+            var encrypted = await fileManager.ReadFile(filePath);
+            var decrypted = Decrypt(encrypted);
+
+            fileManager.WriteFile("DecryptedMessage.txt", decrypted);
+            Console.WriteLine(decrypted);
+
 
 
             }
-        
+
+
+        static string Decrypt(string content)
+        {
+
+            var letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYX";
+            char[] contentR = content.ToCharArray();
+            var lettersArr = letters.ToCharArray();
+            List<char> result = new();
+
+            foreach (char letter in contentR)
+            {
+                if (!char.IsLetter(letter))
+                {
+                    result.Add(letter);
+                    continue;
+
+                }
+                int indexOf = letters.IndexOf(letter);
+                int newIndex = indexOf + 1;
+                result.Add(letters[newIndex]);
+            }
+
+            return new string(result.ToArray());
+
+            //for (int i = 0; i < result.Length; i++)
+            //{
+            //    char curr = result[i];
+            //    if (char.IsLetter(curr))
+            //    {
+            //        result[i] = (char)(curr + 1);
+            //    }
+            //}
+            //return new string(result);
+
+        }
+
         static async Task PrintHelloWorld()
         {
             var random = new Random();
